@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "seatlib"
+version = "0.1.0"
+description = "library seat watcher for Tsinghua"
+authors = ["Bryan Lai <bryanlais@gmail.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+PyYAML = "^6.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
