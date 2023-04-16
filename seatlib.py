@@ -1,32 +1,39 @@
 #!/usr/bin/env python
+# watch for library seats at Tsinghua
 
 # %%
-import json
-import urllib.request
-import random
-import time
+SLEEP_INTERVAL = [10, 20]   # pause between refreshes
+AREAS_YML = './areas.yml'   # export: valid areas
+PREFS_YML = './prefs.yml'   # input:  preferred areas
+API_TSINGHUA_SEATLIB = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
+API_DUMP_JSON = './api-dump.json'
+
 import sys
+import time
+import urllib.request
+import json
+import random
 import yaml
 
 
-# %%
+# %% debugging utilities
 def eprint(*args, **kwargs):
     """ prints to stderr by default """
     kwargs.setdefault('file', sys.stderr)
+    kwargs.setdefault('sep', '\t')
     print(*args, **kwargs)
 
 
-def timestamp():
-    eprint(time.asctime().split()[-2], end='\t')
+def timestamp(fullform=False):
+    return time.asctime() if fullform else time.asctime().split()[-2]
 
 
-timestamp()
-eprint()
+eprint(timestamp(), 'starting seat watcher for Tsinghua libraries...')
 
 
-# %%
-def canonicalize(tree, flatten=True):
-    """ rewrites a yaml tree as a nested dict, recursively """
+# %% load and process preferences
+def canonicalize(tree):
+    """ rewrites the `prefs.yml` tree as a nested dict, recursively """
 
     if tree is None:
         return {}
@@ -42,34 +49,41 @@ def canonicalize(tree, flatten=True):
         for entry in tree:
             if type(entry) is dict:
                 newtree |= {
-                        key: canonicalize(value)
-                        for key, value in entry.items()
-                        if key not in newtree  # skip specified keys
-                    }
+                    key: canonicalize(value)
+                    for key, value in entry.items()
+                    if key not in newtree  # skip specified keys
+                }
             else:
                 newtree |= canonicalize(entry)
         return newtree
 
 
-with open('./prefs.yml') as datafile:
-    target_tree = yaml.safe_load(datafile)
+with open(PREFS_YML) as datafile:
+    prefs_tree = yaml.safe_load(datafile)
 
-eprint('preferences:', target_tree, sep='\t')
-target_tree = canonicalize(target_tree)
-eprint('canonicalized:', target_tree, sep='\t')
-
-# %%
-SEAT_LIB_TSINGHUA = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
-SLEEP_INTERVAL = [10, 20]
+eprint('preferences:', prefs_tree)
+prefs_tree = canonicalize(prefs_tree)
+eprint('canonicalized:', prefs_tree)
 
 
-# %%
-def select_matching(listdicts, key, value):
+# %% load and process dataset from api
+def load_dataset(
+    api_url: str = API_TSINGHUA_SEATLIB,
+    api_dumpfile: str = API_DUMP_JSON
+):
+    """ load data from API and dump to `api-dump.json`, returning seatinfo """
+    with urllib.request.urlopen(api_url) as response:
+        data = response.read()
+    with open(api_dumpfile, 'wb') as dumpfile:
+        dumpfile.write(data)
+    return json.loads(data)['data']['list']['seatinfo']
+
+
+def select_matching(listdicts: list[dict], key, value):
     return [ entry for entry in listdicts if entry[key] == value ]
 
 
-# %%
-def adopt_areas(dataset: list, parents: list):
+def adopt_areas(dataset: list[dict], parents: list[dict]):
     """ adopt child areas from the dataset, for each of the parents """
     families = []
     for this_parent in parents:
@@ -82,16 +96,14 @@ def adopt_areas(dataset: list, parents: list):
     return families
 
 
-with urllib.request.urlopen(SEAT_LIB_TSINGHUA) as datafile:
-    dataset = json.load(datafile)['data']['list']['seatinfo']
-
+dataset = load_dataset()
 godmother = { 'id': 0 }
 libraries = select_matching(dataset, 'parentId', godmother['id'])
-families = adopt_areas(dataset, libraries)
+families_tree = adopt_areas(dataset, libraries)
 
 
-# %%
-def family_names(families: list, grandparent: dict = {}):
+# %% write available areas to `areas.yml`
+def family_names(families: list[dict], grandparent: dict = {}):
     """ generates a nested dict of family names """
     return {
         family['name'].strip(): family_names(
@@ -99,18 +111,19 @@ def family_names(families: list, grandparent: dict = {}):
             grandparent=family
         )
         for family in families
-    } or grandparent['TotalCount']  # for end of the leaf
+    } or grandparent['TotalCount']  # at the end / leaf of the family tree
 
 
-with open('./areas.yml', 'w') as areafile:
+with open(AREAS_YML, 'w') as areafile:
     areafile.write('\n'.join([
-        line.strip() for line in """\
-            # available library areas, with number of spaces
+        line.strip() for line in f"""\
+            # available library sub-areas, with number of spaces
             # this file is generated automatically by `seatlib.py`
+            # at: {timestamp(fullform=True)}
         \n""".splitlines()
     ]))
-    yaml.dump(
-        family_names(families),
+    yaml.safe_dump(
+        family_names(families_tree),
         stream=areafile,
         allow_unicode=True,
         encoding='utf-8'
@@ -118,7 +131,8 @@ with open('./areas.yml', 'w') as areafile:
 
 
 # %%
-def recursive_match(selectors, areas: list, parent_name: str = ''):
+def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
+    """ match areas to area selectors, recursively """
 
     for site in areas:
 
@@ -133,35 +147,32 @@ def recursive_match(selectors, areas: list, parent_name: str = ''):
         }
 
         next_selectors = selectors[matched_keys[0]]
-        if not next_selectors:  # end of the leaf
-            timestamp()
-            eprint(site_info)
+        if not next_selectors:  # at the end / leaf of the family tree
 
+            eprint(timestamp(), site_info)
             if site_info['AvailableSpace']:
                 return site_info
 
             continue  # no return if none available
 
         next_areas = site['children']
-        return recursive_match(next_selectors, next_areas, site_info['name'])
+        return match_areas(next_selectors, next_areas, site_info['name'])
 
 
-def watch(target_tree):
-    with urllib.request.urlopen(SEAT_LIB_TSINGHUA) as datafile:
+def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
+    with urllib.request.urlopen(API_TSINGHUA_SEATLIB) as datafile:
         dataset = json.load(datafile)['data']['list']['seatinfo']
 
     libraries = select_matching(dataset, 'parentId', godmother['id'])
     families = adopt_areas(dataset, libraries)
 
-    hit = recursive_match(target_tree, families)
+    hit = match_areas(prefs_tree, families)
     if hit:
+        print(f"{hit['name']}\t{hit['AvailableSpace']}/{hit['TotalCount']}")
         return hit
 
     time.sleep(random.uniform(*SLEEP_INTERVAL))
-    return watch(target_tree)
+    return watch(prefs_tree, pause=pause)
 
 
-watch(target_tree)
-
-# %%
-# TODO: make functional, make pythonic, return actual target!
+watch(prefs_tree)

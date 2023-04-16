@@ -1,6 +1,0 @@
-{
-    "python.analysis.typeCheckingMode": "basic",
-    "python.linting.flake8Args": [
-        "--extend-ignore=F403,F405,W503,E201,E202,E266"
-    ]
-}
