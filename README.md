@@ -1,6 +1,8 @@
 # seatlib
 Library seat watcher for Tsinghua
 
+This script only watches an area for available seats. It does **not** book the seat for you.
+
 ## install
 
 The only dependencies are `python>=3.9` and `PyYAML` for configurations. However, for cleanliness,
@@ -15,11 +17,18 @@ poetry update -vv
 
 - My personal config is provided as [**prefs.yml**](./prefs.yml)
 - To find available library seating areas, see [**areas.yml**](./areas.yml)
-- If you are already in a environment with all the dependences, simply run with `./seatlib.py`.
+- If you are already in a environment with all the dependences, simply execute [`./seatlib.py`](./seatlib.py).
 - Otherwise, install and run with poetry:
 ```bash
 poetry run ./seatlib.py
 ```
+
+The script [`./seatlib.py`](./seatlib.py):
+- prints its debug output to stderr
+- loops until a seat is found, then
+- stops and prints the found seat to stdout
+
+This output can be further utilized by a messenger, here realized in the helper script [`./daemon.sh`](./daemon.sh), which notifies the user that a seat is available for manual booking.
 
 ## style & `python>=3.9`
 
