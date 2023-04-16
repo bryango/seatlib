@@ -1,7 +1,9 @@
 # seatlib
 Library seat watcher for Tsinghua
 
-This script only watches an area for available seats. It does **not** book the seat for you.
+- This script only _watches_ library areas for available seats.
+- It does _**not**_ book the seat for you. That should be done manually.
+- Pull requests are very welcomed!
 
 ## install
 
