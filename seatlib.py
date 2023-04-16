@@ -143,7 +143,8 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
         site_info = {
             'name': ' '.join([ parent_name, site['name'].strip() ]).strip(),
             'TotalCount': site['TotalCount'],
-            'AvailableSpace': site['TotalCount'] - site['UnavailableSpace']
+            'AvailableSpace': site['TotalCount'] - site['UnavailableSpace'],
+            'id': site['id']
         }
 
         next_selectors = selectors[matched_keys[0]]
@@ -175,4 +176,5 @@ def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
     return watch(prefs_tree, pause=pause)
 
 
-watch(prefs_tree)
+if __name__ == '__main__':
+    watch(prefs_tree)
