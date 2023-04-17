@@ -2,28 +2,28 @@
 ## ... from most preferred to least preferred
 ## ... see `areas.yml` for available areas
 
-# ## a parent area must end with a colon (:)
-# ## ... to foster the child areas
-# 西馆:
-# ## note that the colon (:) has to be "half-width" ascii
-# ## "full-width" colon (：) in Chinese is not valid!
+## a parent area must end with a colon (:)
+## ... to foster the child areas
+西馆:
+## note that the colon (:) has to be "half-width" ascii
+## "full-width" colon (：) in Chinese is not valid!
 
-#   ## a single child with no descendant
-#   ## ... can be listed on the same line as the parent
-#   ## ... and need not end with a colon
-#   二: 224
-#   三:
-#     ## multiple children can be collected in a list
-#     ## ... in which the items are prefixed with a dash (-)
-#     - 315
-#     - 319
+  ## a single child with no descendant
+  ## ... can be listed on the same line as the parent
+  ## ... and need not end with a colon
+  二: 224
+  # 三:
+  #   ## multiple children can be collected in a list
+  #   ## ... in which the items are prefixed with a dash (-)
+  #   - 315
+  #   - 319
 
 文科图书馆:
 
   # area selectors can be suitably abbreviated
   # ... e.g. 一层 -> 一
   一: C
-  # 二: C
+  二: C
   # 三: C
   # 四: C
 

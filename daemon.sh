@@ -6,9 +6,11 @@
 BROWSER=epiphany
 
 if \
-  # data=$(poetry run ./seatlib.py)
-  data="文科图书馆 一层 C区	1/28	95"  # example debug input
+  data=$(poetry run ./seatlib.py)
+  # data="文科图书馆 一层 C区	1/28	95"  # example debug input
 then
+
+  echo "match found:	$data"
 
   # make a sound
   paplay /usr/share/sounds/freedesktop/stereo/complete.oga &

@@ -157,7 +157,10 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
             continue  # no return if none available
 
         next_areas = site['children']
-        return match_areas(next_selectors, next_areas, site_info['name'])
+        next_match = match_areas(next_selectors, next_areas, site_info['name'])
+        if next_match:
+            return next_match
+        continue
 
 
 def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
@@ -169,7 +172,9 @@ def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
 
     hit = match_areas(prefs_tree, families)
     if hit:
-        print(f"{hit['name']}\t{hit['AvailableSpace']}/{hit['TotalCount']}")
+        print(f"{hit['name']}",
+              f"{hit['AvailableSpace']}/{hit['TotalCount']}",
+              f"{hit['id']}", sep='\t')
         return hit
 
     time.sleep(random.uniform(*SLEEP_INTERVAL))
