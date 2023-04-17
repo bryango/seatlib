@@ -37,3 +37,12 @@ This output can be further utilized by a messenger, here realized in the helper 
 As an exercise I try to write pure functions (with no side effects), even though this is expensive in python.
 I have hence relied on the dict merge operator `|` introduced in python 3.9.
 Ideally all variables are immutable in this script.
+
+## api & spelunking
+
+Firefox provides a nice builtin json viewer that is great for spelunking.
+
+```bash
+# curl "https://seat.lib.tsinghua.edu.cn/api.php/v3areas/" > api-dump.json ### this is realized in `seatlib.py`
+cat api-dump.json | jq '.data.list.seatinfo | map(select(.name == "文科图书馆")) | .[0].id'
+```
