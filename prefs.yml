@@ -12,18 +12,22 @@
   ## ... can be listed on the same line as the parent
   ## ... and need not end with a colon
   二: 224
-  # 三:
-  #   ## multiple children can be collected in a list
-  #   ## ... in which the items are prefixed with a dash (-)
-  #   - 315
-  #   - 319
+  三:
+    ## multiple children can be collected in a list
+    ## ... in which the items are prefixed with a dash (-)
+    - 315: ^4
+    - 319: ^4
+    ## a minimal seat number constraint may be specified
+    ## ... '^x' means that the program will not return
+    ## ... until there are > x remaining seats
+    ## ... the default behavior is '^0'
 
 文科图书馆:
 
   # area selectors can be suitably abbreviated
   # ... e.g. 一层 -> 一
   一: C
-  # 二: C
+  二: C
   # 三: C
   # 四: C
 

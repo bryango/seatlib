@@ -35,27 +35,32 @@ eprint(timestamp(), 'starting seat watcher for Tsinghua libraries...')
 def canonicalize(tree):
     """ rewrites the `prefs.yml` tree as a nested dict, recursively """
 
-    if tree is None:
-        return {}
-
-    if all(type(tree) is not x for x in [list, dict]):
-        return { str(tree): {} }
-
     if type(tree) is dict:
-        return { key: canonicalize(value) for key, value in tree.items() }
+        # key is always canonicalize to a string
+        return { str(key): canonicalize(value) for key, value in tree.items() }
 
     if type(tree) is list:
         newtree = {}
         for entry in tree:
             if type(entry) is dict:
                 newtree |= {
-                    key: canonicalize(value)
+                    str(key): canonicalize(value)
                     for key, value in entry.items()
                     if key not in newtree  # skip specified keys
                 }
             else:
                 newtree |= canonicalize(entry)
         return newtree
+
+    if tree is None:
+        return 0
+
+    if type(tree) is str:
+        tree = tree.strip()
+        if tree.startswith('^'):
+            return int(tree.lstrip('^'))
+
+    return { str(tree): 0 }
 
 
 with open(PREFS_YML) as datafile:
@@ -157,10 +162,11 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
         }
 
         next_selectors = selectors[matched_keys[0]]
-        if not next_selectors:  # at the end / leaf of the family tree
+        if type(next_selectors) is int:  # at the end / leaf of the family tree
 
+            minimal_seatnum = next_selectors
             eprint_info(site_info)
-            if site_info['AvailableSpace']:
+            if site_info['AvailableSpace'] > minimal_seatnum:
                 return site_info
 
             continue  # no return if none available
