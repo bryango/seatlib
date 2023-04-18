@@ -23,7 +23,7 @@
   # area selectors can be suitably abbreviated
   # ... e.g. 一层 -> 一
   一: C
-  二: C
+  # 二: C
   # 三: C
   # 四: C
 

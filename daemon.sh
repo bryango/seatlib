@@ -7,7 +7,7 @@ BROWSER=epiphany
 
 if \
   data=$(poetry run ./seatlib.py)
-  # data="文科图书馆 一层 C区	1/28	95"  # example debug input
+  # data="95	1/28	文科图书馆 一层 C区"  # example debug input
 then
 
   echo "match found:	$data"
@@ -17,8 +17,8 @@ then
 
   # make an array
   IFS=$'\t' read -r -a results <<< "$data"
-  seatinfo="${results[0]}  [${results[1]}]"
-  area_id=${results[2]}
+  area_id=${results[0]}
+  seatinfo="${results[2]}  [${results[1]}]"
 
   notify-send \
     "发现座位！ID: $area_id"\

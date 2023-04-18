@@ -131,6 +131,15 @@ with open(AREAS_YML, 'w') as areafile:
 
 
 # %%
+def eprint_info(site_info: dict, timeline: bool = True, **kwargs):
+    if timeline:
+        eprint(timestamp(), end='\t')
+    eprint(f"{site_info['id']}",
+           f"{site_info['AvailableSpace']}/{site_info['TotalCount']}",
+           f"{site_info['name']}",
+           **kwargs)
+
+
 def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
     """ match areas to area selectors, recursively """
 
@@ -150,7 +159,7 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
         next_selectors = selectors[matched_keys[0]]
         if not next_selectors:  # at the end / leaf of the family tree
 
-            eprint(timestamp(), site_info)
+            eprint_info(site_info)
             if site_info['AvailableSpace']:
                 return site_info
 
@@ -172,9 +181,7 @@ def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
 
     hit = match_areas(prefs_tree, families)
     if hit:
-        print(f"{hit['name']}",
-              f"{hit['AvailableSpace']}/{hit['TotalCount']}",
-              f"{hit['id']}", sep='\t')
+        eprint_info(hit, timeline=False, file=sys.stdout)
         return hit
 
     time.sleep(random.uniform(*SLEEP_INTERVAL))
