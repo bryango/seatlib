@@ -10,7 +10,14 @@ readme = "README.md"
 python = "^3.10"
 PyYAML = "^6.0"
 
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+select = ["E", "F", "W"]
+ignore = [
+    # "F403",
+    # "F405",
+    "E402", # imports not at the very top
+]
