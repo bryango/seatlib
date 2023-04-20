@@ -9,6 +9,7 @@ API_TSINGHUA_SEATLIB = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
 API_DUMP_JSON = './api-dump.json'
 
 import sys
+import signal
 import time
 import urllib.request
 import json
@@ -23,12 +24,16 @@ def eprint(*args, **kwargs):
     kwargs.setdefault('sep', '\t')
     print(*args, **kwargs)
 
-
 def timestamp(fullform=False):
     return time.asctime() if fullform else time.asctime().split()[-2]
 
-
 eprint(timestamp(), 'starting seat watcher for Tsinghua libraries...')
+
+### suppress KeyboardInterrupt
+signal.signal(
+    signal.SIGINT,
+    lambda signal_number, current_stack_frame: sys.exit(0)
+)
 
 
 # %% load and process preferences

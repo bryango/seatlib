@@ -1,9 +1,12 @@
 #!/bin/bash
 # daemon that runs seatlib.py & notifies the user
 
+BROWSER=epiphany
+
 # set -x  # for debug output
 
-BROWSER=epiphany
+cd "$(dirname "$0")" || exit
+$EDITOR ./prefs.yml
 
 if \
   data=$(poetry run ./seatlib.py)
