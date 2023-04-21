@@ -15,7 +15,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-seatlib = 'seatlib:run'
+seatlib = 'seatlib:execute'
 
 [tool.ruff]
 select = ["E", "F", "W"]
