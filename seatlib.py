@@ -199,5 +199,9 @@ def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
     return watch(prefs_tree, pause=pause)
 
 
-if __name__ == '__main__':
+def run() -> None:
+    """ called from the package entry point, with no return """
     watch(prefs_tree)
+
+if __name__ == '__main__':
+    run()

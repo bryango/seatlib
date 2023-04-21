@@ -5,7 +5,7 @@ BROWSER=epiphany
 
 # set -x  # for debug output
 
-cd "$(dirname "$0")" || exit
+cd "$(dirname "$(readlink -f "$0")")" || exit
 $EDITOR ./prefs.yml
 
 if \
