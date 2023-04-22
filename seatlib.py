@@ -8,6 +8,7 @@ PREFS_YML = './prefs.yml'   # input:  preferred areas
 API_TSINGHUA_SEATLIB = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
 API_DUMP_JSON = './api-dump.json'
 
+import os
 import sys
 import signal
 import time
@@ -15,6 +16,9 @@ import urllib.request
 import json
 import random
 import yaml
+
+## cd "$(dirname "$(readlink -f "$0")")"
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 # %% debugging utilities
