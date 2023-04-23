@@ -53,7 +53,8 @@ if __name__ != '__main__':  # the script is imported:
                             .config_dir()
     except ModuleNotFoundError:
         CONFIG_DIR = os.path.expanduser('~/.config/seatlib')
-    eprint('config dir:', CONFIG_DIR)
+
+eprint('config dir:', os.path.abspath(CONFIG_DIR))
 
 def find_config(yml_config: str) -> str:
     """ find and return config path, creating a default if non-existed """
@@ -170,9 +171,8 @@ with open(find_config(AREAS_YML), 'w') as areafile:
 
 
 # %%
-def eprint_info(site_info: dict, timeline: bool = True, **kwargs):
-    if timeline:
-        eprint(timestamp(), end='\t')
+def eprint_info(site_info: dict, **kwargs):
+    eprint(timestamp(), end='\t')
     eprint(f"{site_info['id']}",
            f"{site_info['AvailableSpace']}/{site_info['TotalCount']}",
            f"{site_info['name']}",
@@ -229,7 +229,7 @@ def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
 
     hit = match_areas(prefs_tree, families)
     if hit:
-        eprint_info(hit, timeline=False, file=sys.stdout)
+        eprint_info(hit, file=sys.stdout)
         return hit
 
     time.sleep(random.uniform(*SLEEP_INTERVAL))

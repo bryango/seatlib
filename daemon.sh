@@ -10,18 +10,18 @@ $EDITOR ./prefs.yml
 
 if \
   data=$(poetry run ./seatlib.py)
-  # data="95	1/28	文科图书馆 一层 C区"  # example debug input
+  # data="15:00:16	95	1/28	文科图书馆 一层 C区"  # example debug input
 then
 
-  echo "match found:	$data"
+  echo "$data"
 
   # make a sound
   paplay /usr/share/sounds/freedesktop/stereo/complete.oga &
 
   # make an array
   IFS=$'\t' read -r -a results <<< "$data"
-  area_id=${results[0]}
-  seatinfo="${results[2]}  [${results[1]}]"
+  area_id=${results[1]}
+  seatinfo="${results[3]}  [${results[2]}]"
 
   notify-send \
     "发现座位！ID: $area_id"\
