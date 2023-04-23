@@ -19,9 +19,9 @@ The only dependencies are:
 - `python>=3.9` for the dict merge operator `|`
 - `PyYAML` for configurations
 - `confuse` optional for package config management
-If you are already in a environment with all the dependences, simply execute [`./seatlib.py`](./seatlib.py).
 
-However, for cleanliness,
+If you are already in a environment with all the dependences, simply execute [`./seatlib.py`](./seatlib.py).
+However, for cleanliness, it is recommended to:
 - install [**pipx**](https://pypa.github.io/pipx/) (believe me, it's worth it)
 - install [**poetry** with pipx](https://python-poetry.org/docs/#installing-with-pipx) (believe me, it's worth it)
 - sync the dependencies with poetry, in a local venv, then run the script:
