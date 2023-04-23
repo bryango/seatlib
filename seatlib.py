@@ -32,6 +32,7 @@ eprint(
     timestamp(),
     f'starting seat watcher for Tsinghua libraries as `{__name__}`...'
 )
+eprint()
 
 ### suppress KeyboardInterrupt
 signal.signal(
@@ -101,6 +102,7 @@ with open(find_config(PREFS_YML), 'r') as datafile:
 eprint('preferences:', prefs_tree)
 prefs_tree = canonicalize(prefs_tree)
 eprint('canonicalized:', prefs_tree)
+eprint()
 
 
 # %% load and process dataset from api
@@ -175,6 +177,14 @@ def eprint_info(site_info: dict, timeline: bool = True, **kwargs):
            f"{site_info['AvailableSpace']}/{site_info['TotalCount']}",
            f"{site_info['name']}",
            **kwargs)
+
+# print header
+eprint_info({
+    'id': 'id',
+    'name': 'name',
+    'AvailableSpace': '👌',
+    'TotalCount': '👇'
+})
 
 
 def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
