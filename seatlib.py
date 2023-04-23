@@ -3,8 +3,8 @@
 
 # %%
 SLEEP_INTERVAL = [10, 20]   # pause between refreshes
-AREAS_YML = './areas.yml'   # export: valid areas
-PREFS_YML = './prefs.yml'   # input:  preferred areas
+AREAS_YML = 'areas.yml'     # export: valid areas
+PREFS_YML = 'prefs.yml'     # input:  preferred areas
 API_TSINGHUA_SEATLIB = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
 API_DUMP_JSON = './api-dump.json'
 
@@ -17,9 +17,6 @@ import json
 import random
 import yaml
 
-## cd "$(dirname "$(readlink -f "$0")")"
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
 
 # %% debugging utilities
 def eprint(*args, **kwargs):
@@ -31,13 +28,40 @@ def eprint(*args, **kwargs):
 def timestamp(fullform=False):
     return time.asctime() if fullform else time.asctime().split()[-2]
 
-eprint(timestamp(), 'starting seat watcher for Tsinghua libraries...')
+eprint(
+    timestamp(),
+    f'starting seat watcher for Tsinghua libraries as `{__name__}`...'
+)
+eprint()
 
 ### suppress KeyboardInterrupt
 signal.signal(
     signal.SIGINT,
     lambda signal_number, current_stack_frame: sys.exit(0)
 )
+
+
+# %% paths & config
+## cd "$(dirname "$(readlink -f "$0")")"
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+CONFIG_DIR : str = '.'
+if __name__ != '__main__':  # the script is imported:
+    try:  # cross platform config management
+        import confuse
+        CONFIG_DIR = confuse.Configuration('seatlib', modname=__name__) \
+                            .config_dir()
+    except ModuleNotFoundError:
+        CONFIG_DIR = os.path.expanduser('~/.config/seatlib')
+    eprint('config dir:', CONFIG_DIR)
+
+def find_config(yml_config: str) -> str:
+    """ find and return config path, creating a default if non-existed """
+    config_path = os.path.join(CONFIG_DIR, yml_config)
+    if not os.path.exists(config_path):
+        import shutil
+        shutil.copy2(yml_config, config_path)
+    return config_path
 
 
 # %% load and process preferences
@@ -72,12 +96,13 @@ def canonicalize(tree):
     return { str(tree): 0 }
 
 
-with open(PREFS_YML) as datafile:
+with open(find_config(PREFS_YML), 'r') as datafile:
     prefs_tree = yaml.safe_load(datafile)
 
 eprint('preferences:', prefs_tree)
 prefs_tree = canonicalize(prefs_tree)
 eprint('canonicalized:', prefs_tree)
+eprint()
 
 
 # %% load and process dataset from api
@@ -117,10 +142,10 @@ families_tree = adopt_areas(dataset, libraries)
 
 
 # %% write available areas to `areas.yml`
-def family_names(families: list[dict], grandparent: dict = {}):
+def families_names(families: list[dict], grandparent: dict = {}):
     """ generates a nested dict of family names """
     return {
-        family['name'].strip(): family_names(
+        family['name'].strip(): families_names(
             families=family['children'],
             grandparent=family
         )
@@ -128,7 +153,7 @@ def family_names(families: list[dict], grandparent: dict = {}):
     } or grandparent['TotalCount']  # at the end / leaf of the family tree
 
 
-with open(AREAS_YML, 'w') as areafile:
+with open(find_config(AREAS_YML), 'w') as areafile:
     areafile.write('\n'.join([
         line.strip() for line in f"""\
             # available library sub-areas, with number of spaces
@@ -137,7 +162,7 @@ with open(AREAS_YML, 'w') as areafile:
         \n""".splitlines()
     ]))
     yaml.safe_dump(
-        family_names(families_tree),
+        families_names(families_tree),
         stream=areafile,
         allow_unicode=True,
         encoding='utf-8'
@@ -152,6 +177,14 @@ def eprint_info(site_info: dict, timeline: bool = True, **kwargs):
            f"{site_info['AvailableSpace']}/{site_info['TotalCount']}",
            f"{site_info['name']}",
            **kwargs)
+
+# print header
+eprint_info({
+    'id': 'id',
+    'name': 'name',
+    'AvailableSpace': '👌',
+    'TotalCount': '👇'
+})
 
 
 def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):

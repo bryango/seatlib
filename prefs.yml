@@ -15,8 +15,8 @@
   三:
     ## multiple children can be collected in a list
     ## ... in which the items are prefixed with a dash (-)
-    - 315: ^2
-    - 319: ^3
+    # - 315: ^2  # the book smell is too overwhelming
+    - 319: ^4
     ## a minimal seat number constraint may be specified
     ## ... '^x' means that the program will not return
     ## ... until there are > x remaining seats
