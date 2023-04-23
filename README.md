@@ -7,21 +7,26 @@ Library seat watcher for Tsinghua
 
 ## install
 
-The only dependencies are `python>=3.9` and `PyYAML` for configurations. However, for cleanliness,
+### as a pacakge
+
+- install [**pipx**](https://pypa.github.io/pipx/) (believe me, it's worth it)
+- `pipx install git+https://github.com/bryango/seatlib`
+- run `seatlib` and see!
+
+### as a script
+
+The only dependencies are:
+- `python>=3.9` for the dict merge operator `|`
+- `PyYAML` for configurations
+- `confuse` optional for package config management
+If you are already in a environment with all the dependences, simply execute [`./seatlib.py`](./seatlib.py).
+
+However, for cleanliness,
 - install [**pipx**](https://pypa.github.io/pipx/) (believe me, it's worth it)
 - install [**poetry** with pipx](https://python-poetry.org/docs/#installing-with-pipx) (believe me, it's worth it)
-- sync the dependencies with poetry, in a local venv:
+- sync the dependencies with poetry, in a local venv, then run the script:
 ```bash
 poetry update -vv
-```
-
-## config & run
-
-- My personal config is provided as [**prefs.yml**](./prefs.yml)
-- To find available library seating areas, see [**areas.yml**](./areas.yml)
-- If you are already in a environment with all the dependences, simply execute [`./seatlib.py`](./seatlib.py).
-- Otherwise, install and run with poetry:
-```bash
 poetry run ./seatlib.py
 ```
 
@@ -31,6 +36,17 @@ The script [`./seatlib.py`](./seatlib.py):
 - stops and prints the found seat to stdout
 
 This output can be further utilized by a messenger, here realized in the helper script [`./daemon.sh`](./daemon.sh), which notifies the user that a seat is available for manual booking.
+
+## config & run
+
+- when run as a package, the default config is located at `~/.config/seatlib` for linux
+- when run as a script, the default config is located at the script directory
+
+The config should be correctly generated at the usual user config directory for all platforms.
+The debug printout would show you the config directory. 
+
+- My personal config is provided as [**prefs.yml**](./prefs.yml)
+- To find available library seating areas, see [**areas.yml**](./areas.yml)
 
 ## style & `python>=3.9`
 
