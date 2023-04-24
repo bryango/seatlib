@@ -172,8 +172,8 @@ with open(find_config(AREAS_YML), 'w') as areafile:
 
 # %%
 def eprint_info(site_info: dict, **kwargs):
-    eprint(timestamp(), end='\t')
-    eprint(f"{site_info['id']}",
+    eprint(timestamp(),
+           f"{site_info['id']}",
            f"{site_info['AvailableSpace']}/{site_info['TotalCount']}",
            f"{site_info['name']}",
            **kwargs)
