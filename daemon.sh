@@ -1,12 +1,15 @@
 #!/bin/bash
 # daemon that runs seatlib.py & notifies the user
 
+## this script is designed to run seatlib.py directly
+## ... without installation
+
 BROWSER=epiphany
 
 # set -x  # for debug output
 
 cd "$(dirname "$(readlink -f "$0")")" || exit
-$EDITOR ./prefs.yml
+$EDITOR ./config/prefs.yml
 
 if \
   data=$(poetry run ./seatlib.py)

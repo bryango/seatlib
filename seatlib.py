@@ -3,8 +3,10 @@
 
 # %%
 SLEEP_INTERVAL = [10, 20]   # pause between refreshes
-AREAS_YML = 'areas.yml'     # export: valid areas
-PREFS_YML = 'prefs.yml'     # input:  preferred areas
+AREAS_YML : str = 'areas.yml'     # export: valid areas
+PREFS_YML : str = 'prefs.yml'     # input:  preferred areas
+CONFIG_DIR_DEFAULT : str = 'config'
+
 API_TSINGHUA_SEATLIB = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
 API_DUMP_JSON = './api-dump.json'
 
@@ -42,10 +44,13 @@ signal.signal(
 
 
 # %% paths & config
+
 ## cd "$(dirname "$(readlink -f "$0")")"
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-CONFIG_DIR : str = '.'
+CONFIG_DIR : str = CONFIG_DIR_DEFAULT
+
+## update CONFIG_DIR
 if __name__ != '__main__':  # the script is imported:
     try:  # cross platform config management
         import confuse
@@ -61,7 +66,9 @@ def find_config(yml_config: str) -> str:
     config_path = os.path.join(CONFIG_DIR, yml_config)
     if not os.path.exists(config_path):
         import shutil
-        shutil.copy2(yml_config, config_path)
+        config_path_default = os.path.join(CONFIG_DIR_DEFAULT, yml_config)
+        shutil.copy2(config_path_default, config_path)
+
     return config_path
 
 
