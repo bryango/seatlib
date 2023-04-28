@@ -2,25 +2,25 @@
 ## ... from most preferred to least preferred
 ## ... see `areas.yml` for available areas
 
-## a parent area must end with a colon (:)
-## ... to foster the child areas
-西馆:
-## note that the colon (:) has to be "half-width" ascii
-## "full-width" colon (：) in Chinese is not valid!
+# ## a parent area must end with a colon (:)
+# ## ... to foster the child areas
+# 西馆:
+# ## note that the colon (:) has to be "half-width" ascii
+# ## "full-width" colon (：) in Chinese is not valid!
 
-  ## a single child with no descendant
-  ## ... can be listed on the same line as the parent
-  ## ... and need not end with a colon
-  二: 224
-  三:
-    ## multiple children can be collected in a list
-    ## ... in which the items are prefixed with a dash (-)
-    # - 315: ^2  # the book smell is too overwhelming
-    - 319: ^4
-    ## a minimal seat number constraint may be specified
-    ## ... '^x' means that the program will not return
-    ## ... until there are > x remaining seats
-    ## ... the default behavior is '^0'
+#   ## a single child with no descendant
+#   ## ... can be listed on the same line as the parent
+#   ## ... and need not end with a colon
+#   二: 224
+#   三:
+#     ## multiple children can be collected in a list
+#     ## ... in which the items are prefixed with a dash (-)
+#     # - 315: ^2  # the book smell is too overwhelming
+#     - 319: ^4
+#     ## a minimal seat number constraint may be specified
+#     ## ... '^x' means that the program will not return
+#     ## ... until there are > x remaining seats
+#     ## ... the default behavior is '^0'
 
 文科图书馆:
 
