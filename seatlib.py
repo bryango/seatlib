@@ -164,7 +164,7 @@ def families_names(families: list[dict], grandparent: dict = {}):
 with open(find_config(AREAS_YML), 'w') as areafile:
     areafile.write('\n'.join([
         line.strip() for line in f"""\
-            # available library sub-areas, with number of spaces
+            # available library sub-areas, with available spaces
             # this file is generated automatically by `seatlib.py`
             # at: {timestamp(fullform=True)}
         \n""".splitlines()
