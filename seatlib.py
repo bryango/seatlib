@@ -216,14 +216,6 @@ def eprint_info(site_info: dict, **kwargs):
            f"{site_info['name']}",
            **kwargs)
 
-# print header
-eprint_info({
-    'id': 'id',
-    'name': 'name',
-    'AvailableSpace': '👌',
-    'TotalCount': '👇'
-})
-
 
 def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
     """ match areas to area selectors, recursively """
@@ -259,6 +251,14 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
 
 
 def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
+
+    # print header
+    eprint_info({
+        'id': 'id',
+        'name': 'name',
+        'AvailableSpace': '👌',
+        'TotalCount': '👇'
+    })
 
     # reload dataset
     dataset = load_dataset()
