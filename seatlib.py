@@ -8,8 +8,10 @@ PREFS_YML : str = 'prefs.yml'     # input:  preferred areas
 HATES_YML : str = 'hates.yml'     # input:  hated areas
 CONFIG_DIR_DEFAULT : str = 'config'
 
-API_TSINGHUA_SEATLIB = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
-API_DUMP_JSON = './api-dump.json'
+DUMP_AREAS = './api-dump.json'
+API_TSINGHUA_AREAS = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
+API_TSINGHUA_DAYS = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areadays'
+API_TSINGHUA_SEATCODES = 'https://seat.lib.tsinghua.edu.cn/api.php/spaces_old'
 
 import os
 import sys
@@ -18,6 +20,8 @@ import time
 import urllib.request
 import json
 import random
+import functools
+import operator
 import yaml
 
 ## working directory
@@ -130,15 +134,19 @@ eprint()
 
 # %% load and process dataset from api
 def load_dataset(
-    api_url: str = API_TSINGHUA_SEATLIB,
-    api_dumpfile: str = API_DUMP_JSON
+    api_url: str = API_TSINGHUA_AREAS,
+    selectors: list[str] = ['data', 'list', 'seatinfo'],
+    dump_path: str = ''
 ):
     """ load data from API and dump to `api-dump.json`, returning seatinfo """
     with urllib.request.urlopen(api_url) as response:
         data = response.read()
-    with open(api_dumpfile, 'wb') as dumpfile:
-        dumpfile.write(data)
-    return json.loads(data)['data']['list']['seatinfo']
+    if dump_path:
+        with open(dump_path, 'wb') as dumpfile:
+            dumpfile.write(data)
+
+    # nested dict access: https://stackoverflow.com/a/14692747
+    return functools.reduce(operator.getitem, selectors, json.loads(data))
 
 
 def select_matching(listdicts: list[dict], key, value):
@@ -158,7 +166,7 @@ def adopt_areas(dataset: list[dict], parents: list[dict]):
     return families
 
 
-dataset = load_dataset()
+dataset = load_dataset(dump_path=DUMP_AREAS)
 godmother = { 'id': 0 }
 libraries = select_matching(dataset, 'parentId', godmother['id'])
 families_tree = adopt_areas(dataset, libraries)
@@ -190,6 +198,14 @@ with open(find_config(AREAS_YML), 'w') as areafile:
         allow_unicode=True,
         encoding='utf-8'
     )
+
+
+# %% filter hate list
+def fetch_day_id(area_id: int):
+    pass
+
+def load_seatcodes(area_id: int):
+    pass
 
 
 # %%
@@ -228,7 +244,7 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
         next_selectors = selectors[matched_keys[0]]
         if type(next_selectors) is int:  # at the end / leaf of the family tree
 
-            minimal_seatnum = next_selectors
+            minimal_seatnum : int = next_selectors
             eprint_info(site_info)
             if site_info['AvailableSpace'] > minimal_seatnum:
                 return site_info
@@ -243,8 +259,9 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
 
 
 def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
-    with urllib.request.urlopen(API_TSINGHUA_SEATLIB) as datafile:
-        dataset = json.load(datafile)['data']['list']['seatinfo']
+
+    # reload dataset
+    dataset = load_dataset()
 
     libraries = select_matching(dataset, 'parentId', godmother['id'])
     families = adopt_areas(dataset, libraries)
