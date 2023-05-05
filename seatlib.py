@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # watch for library seats at Tsinghua
 
-# %% setup
+# %% setup & paths
 SLEEP_INTERVAL = [10, 20]   # pause between refreshes
 AREAS_YML : str = 'areas.yml'     # export: valid areas
 PREFS_YML : str = 'prefs.yml'     # input:  preferred areas
 HATES_YML : str = 'hates.yml'     # input:  hated areas
 CONFIG_DIR_DEFAULT : str = 'config'
 
-DUMP_AREAS = './api-dump.json'
+APIDUMP_AREAS = './api-dump.json'
 API_TSINGHUA_AREAS = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
 API_TSINGHUA_DAYS = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areadays'
 API_TSINGHUA_SEATCODES = 'https://seat.lib.tsinghua.edu.cn/api.php/spaces_old'
@@ -24,9 +24,15 @@ import functools
 import operator
 import yaml
 
-## working directory
+### set working directory
 ## $ cd "$(dirname "$(readlink -f "$0")")"
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+### suppress KeyboardInterrupt
+signal.signal(
+    signal.SIGINT,
+    lambda signal_number, current_stack_frame: sys.exit(0)
+)
 
 
 # %% debugging utilities
@@ -45,14 +51,8 @@ eprint(
 )
 eprint()
 
-### suppress KeyboardInterrupt
-signal.signal(
-    signal.SIGINT,
-    lambda signal_number, current_stack_frame: sys.exit(0)
-)
 
-
-# %% paths & config
+# %% config
 
 ## initialize CONFIG_DIR
 CONFIG_DIR : str = CONFIG_DIR_DEFAULT
@@ -166,7 +166,7 @@ def adopt_areas(dataset: list[dict], parents: list[dict]):
     return families
 
 
-dataset = load_dataset(dump_path=DUMP_AREAS)
+dataset = load_dataset(dump_path=APIDUMP_AREAS)
 godmother = { 'id': 0 }
 libraries = select_matching(dataset, 'parentId', godmother['id'])
 families_tree = adopt_areas(dataset, libraries)
@@ -208,7 +208,7 @@ def load_seatcodes(area_id: int):
     pass
 
 
-# %%
+# %% find matched areas
 def eprint_info(site_info: dict, **kwargs):
     eprint(timestamp(),
            f"{site_info['id']}",
@@ -250,6 +250,7 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
         continue
 
 
+# %% watch the api and match the prefs
 def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
 
     # print header
@@ -278,6 +279,7 @@ def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
 def execute() -> None:
     """ provides the script entry point, with no return """
     watch(prefs_tree)
+
 
 if __name__ == '__main__':
     execute()
