@@ -2,13 +2,13 @@
 # watch for library seats at Tsinghua
 
 # %% setup & paths
-SLEEP_INTERVAL = [10, 20]   # pause between refreshes
-AREAS_YML : str = 'areas.yml'     # export: valid areas
-PREFS_YML : str = 'prefs.yml'     # input:  preferred areas
-HATES_YML : str = 'hates.yml'     # input:  hated areas
+SLEEP_INTERVAL = [10, 20]       # pause between refreshes
+AREAS_YML : str = 'areas.yml'   # output: valid areas
+PREFS_YML : str = 'prefs.yml'   # input:  preferred areas
+HATES_YML : str = 'hates.yml'   # input:  hated areas
 CONFIG_DIR_DEFAULT : str = 'config'
 
-APIDUMP_AREAS = './api-dump.json'
+API_DUMP_AREAS = './api-dump.json'
 API_TSINGHUA_AREAS = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
 API_TSINGHUA_DAYS = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areadays'
 API_TSINGHUA_SEATCODES = 'https://seat.lib.tsinghua.edu.cn/api.php/spaces_old'
@@ -52,7 +52,7 @@ eprint(
 eprint()
 
 
-# %% config
+# %% config discovery
 
 ## initialize CONFIG_DIR
 CONFIG_DIR : str = CONFIG_DIR_DEFAULT
@@ -81,7 +81,7 @@ def find_config(yml_config: str) -> str:
     return config_path
 
 
-# %% load and process preferences
+# %% process preferences
 def canonicalize_prefs(tree):
     """ rewrites the `prefs.yml` tree as a nested dict, recursively """
 
@@ -132,7 +132,7 @@ eprint('canonicalized:', prefs_tree)
 eprint()
 
 
-# %% load and process dataset from api
+# %% load dataset from api
 def load_dataset(
     api_url: str = API_TSINGHUA_AREAS,
     selectors: list[str] = ['data', 'list', 'seatinfo'],
@@ -166,13 +166,13 @@ def adopt_areas(dataset: list[dict], parents: list[dict]):
     return families
 
 
-dataset = load_dataset(dump_path=APIDUMP_AREAS)
+dataset = load_dataset(dump_path=API_DUMP_AREAS)
 godmother = { 'id': 0 }
 libraries = select_matching(dataset, 'parentId', godmother['id'])
 families_tree = adopt_areas(dataset, libraries)
 
 
-# %% write available areas to `areas.yml`
+# %% export available areas
 def families_names(families: list[dict], grandparent: dict = {}):
     """ generates a nested dict of family names """
     return {
@@ -200,7 +200,7 @@ with open(find_config(AREAS_YML), 'w') as areafile:
     )
 
 
-# %% filter hate list
+# %% filter hate list TODO
 def fetch_day_id(area_id: int):
     pass
 
@@ -208,7 +208,7 @@ def load_seatcodes(area_id: int):
     pass
 
 
-# %% find matched areas
+# %% find selected areas
 def eprint_info(site_info: dict, **kwargs):
     eprint(timestamp(),
            f"{site_info['id']}",
@@ -250,7 +250,7 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
         continue
 
 
-# %% watch the api and match the prefs
+# %% watch the api
 def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
 
     # print header
