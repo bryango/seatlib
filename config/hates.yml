@@ -1,0 +1,17 @@
+## this is the block list of seat codes
+## the file must be loaded as a list of strings
+
+## glob patterns may be used to specify blocked seat codes
+## ... this is realized by the builtin `fnmatch` module
+## ... see: https://docs.python.org/3/library/fnmatch.html
+
+## broken window shades
+# humanities library
+- 'F1C004'
+
+## window-less seats
+# west area 315
+- 'WF3E009'
+- 'WF3E01[012]'
+# west area 319
+- 'WF3E02[1234]'

@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # watch for library seats at Tsinghua
 
-# %%
+# %% setup
 SLEEP_INTERVAL = [10, 20]   # pause between refreshes
 AREAS_YML : str = 'areas.yml'     # export: valid areas
 PREFS_YML : str = 'prefs.yml'     # input:  preferred areas
+HATES_YML : str = 'hates.yml'     # input:  hated areas
 CONFIG_DIR_DEFAULT : str = 'config'
 
 API_TSINGHUA_SEATLIB = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
@@ -18,6 +19,10 @@ import urllib.request
 import json
 import random
 import yaml
+
+## working directory
+## $ cd "$(dirname "$(readlink -f "$0")")"
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 # %% debugging utilities
@@ -45,9 +50,7 @@ signal.signal(
 
 # %% paths & config
 
-## cd "$(dirname "$(readlink -f "$0")")"
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
+## initialize CONFIG_DIR
 CONFIG_DIR : str = CONFIG_DIR_DEFAULT
 
 ## update CONFIG_DIR
@@ -59,7 +62,9 @@ if __name__ != '__main__':  # the script is imported:
     except ModuleNotFoundError:
         CONFIG_DIR = os.path.expanduser('~/.config/seatlib')
 
-eprint('config dir:', os.path.abspath(CONFIG_DIR))
+CONFIG_DIR = os.path.abspath(CONFIG_DIR)
+eprint('config dir:', CONFIG_DIR)
+
 
 def find_config(yml_config: str) -> str:
     """ find and return config path, creating a default if non-existed """
@@ -73,24 +78,27 @@ def find_config(yml_config: str) -> str:
 
 
 # %% load and process preferences
-def canonicalize(tree):
+def canonicalize_prefs(tree):
     """ rewrites the `prefs.yml` tree as a nested dict, recursively """
 
     if type(tree) is dict:
         # key is always canonicalize to a string
-        return { str(key): canonicalize(value) for key, value in tree.items() }
+        return {
+            str(key): canonicalize_prefs(value)
+            for key, value in tree.items()
+        }
 
     if type(tree) is list:
         newtree = {}
         for entry in tree:
             if type(entry) is dict:
                 newtree |= {
-                    str(key): canonicalize(value)
+                    str(key): canonicalize_prefs(value)
                     for key, value in entry.items()
                     if key not in newtree  # skip specified keys
                 }
             else:
-                newtree |= canonicalize(entry)
+                newtree |= canonicalize_prefs(entry)
         return newtree
 
     if tree is None:
@@ -104,11 +112,18 @@ def canonicalize(tree):
     return { str(tree): 0 }
 
 
+# hates.yml
+hatelist_path = find_config(HATES_YML)
+with open(hatelist_path, 'r') as datafile:
+    hatelist : list[str] = yaml.safe_load(datafile)
+    eprint('block list:', hatelist_path)
+
+# prefs.yml
 with open(find_config(PREFS_YML), 'r') as datafile:
     prefs_tree = yaml.safe_load(datafile)
 
 eprint('preferences:', prefs_tree)
-prefs_tree = canonicalize(prefs_tree)
+prefs_tree = canonicalize_prefs(prefs_tree)
 eprint('canonicalized:', prefs_tree)
 eprint()
 

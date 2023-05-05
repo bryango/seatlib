@@ -20,13 +20,9 @@ def rm_prefs():
 @pytest.fixture
 def cleanup_prefs():
     """ clean up before and after the test """
-
-    # before
-    rm_prefs()
+    rm_prefs()  # before
     yield
-
-    # after
-    rm_prefs()
+    rm_prefs()  # after
 
 
 def test_prefs(cleanup_prefs):
