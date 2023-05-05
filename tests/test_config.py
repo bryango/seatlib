@@ -3,18 +3,24 @@ import sys
 
 import pytest
 
-PREFS_PATH_LINUX = os.path.expanduser('~/.config/seatlib/prefs.yml')
-
+PREFS_PATHS_LINUX : list[str] = [
+    os.path.expanduser(yml_config)
+    for yml_config in [
+        '~/.config/seatlib/prefs.yml',
+        '~/.config/seatlib/hates.yml',
+    ]
+]
 
 def rm_prefs():
     """ remove installed prefs """
     if sys.platform == 'linux':
-        try:
-            os.remove(PREFS_PATH_LINUX)
-            print(f"# {PREFS_PATH_LINUX} removed")
-        except FileNotFoundError:
-            print(f"# {PREFS_PATH_LINUX} not found")
-            pass
+        for yml_config in PREFS_PATHS_LINUX:
+            try:
+                os.remove(yml_config)
+                print(f"# {yml_config} removed")
+            except FileNotFoundError:
+                print(f"# {yml_config} not found")
+                pass
 
 
 @pytest.fixture
@@ -29,8 +35,14 @@ def test_prefs(cleanup_prefs):
     """ check if default prefs are correctly generated """
 
     import seatlib  # when imported
-    prefs_path = seatlib.find_config(seatlib.PREFS_YML)
-    assert os.path.exists(prefs_path)
+    prefs_paths = [
+        seatlib.find_config(yml_config)
+        for yml_config in [
+            seatlib.PREFS_YML,
+            seatlib.HATES_YML
+        ]
+    ]
+    assert all(os.path.exists(yml_config) for yml_config in prefs_paths)
 
     if sys.platform == 'linux':
-        assert prefs_path == PREFS_PATH_LINUX
+        assert prefs_paths == PREFS_PATHS_LINUX
