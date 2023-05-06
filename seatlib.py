@@ -116,19 +116,27 @@ def canonicalize_prefs(tree):
     return { str(tree): 0 }
 
 
-# hates.yml
-hatelist_path = find_config(HATES_YML)
-with open(hatelist_path, 'r') as datafile:
-    hatelist : list[str] = yaml.safe_load(datafile)
-    eprint('block list:', hatelist_path)
+def load_prefs():
+    with open(find_config(PREFS_YML), 'r') as datafile:
+        prefs_tree = yaml.safe_load(datafile)
 
-# prefs.yml
-with open(find_config(PREFS_YML), 'r') as datafile:
-    prefs_tree = yaml.safe_load(datafile)
+    eprint('preferences:', prefs_tree)
+    prefs_tree = canonicalize_prefs(prefs_tree)
+    eprint('canonicalized:', prefs_tree)
 
-eprint('preferences:', prefs_tree)
-prefs_tree = canonicalize_prefs(prefs_tree)
-eprint('canonicalized:', prefs_tree)
+    return prefs_tree
+
+
+def load_hatelist() -> list[str]:
+    hatelist_path = find_config(HATES_YML)
+    with open(hatelist_path, 'r') as datafile:
+        hatelist : list[str] = yaml.safe_load(datafile)
+        eprint('block list:', hatelist_path)
+    return hatelist
+
+
+hatelist = load_hatelist()
+prefs_tree = load_prefs()
 eprint()
 
 
@@ -142,8 +150,8 @@ def load_dataset(
     with urllib.request.urlopen(api_url) as response:
         data = response.read()
     if api_dump_path:
-        with open(api_dump_path, 'wb') as dumpfile:
-            dumpfile.write(data)
+        with open(api_dump_path, 'wb') as datafile:
+            datafile.write(data)
 
     # nested dict access: https://stackoverflow.com/a/14692747
     return functools.reduce(operator.getitem, selectors, json.loads(data))
@@ -153,32 +161,31 @@ def select_matching(listdicts: list[dict], key, value) -> list:
     return [ entry for entry in listdicts if entry[key] == value ]
 
 
-def select_by_parent(dataset: list[dict], parent_id: int = 0) -> list:
-    """ select by `parentId`, which defaults to 0 for top level libraries """
+def select_children(dataset: list[dict], parent_id: int = 0) -> list:
+    """ select children by `parentId`, which defaults to 0 at top level """
     return select_matching(dataset, 'parentId', parent_id)
 
 
-def adopt_areas(dataset: list[dict], parents: list[dict]):
-    """ adopt child areas from the dataset, for each of the parents """
+def adopt_children(dataset: list[dict], parents: list[dict]):
+    """ adopt children from the dataset, for each of the parents """
     families = []
     for this_parent in parents:
-        children = select_by_parent(dataset, this_parent['id'])
+        children = select_children(dataset, this_parent['id'])
         families.append(
             this_parent | {
-                'children': adopt_areas(dataset, parents=children)
+                'children': adopt_children(dataset, parents=children)
             }
         )
     return families
 
 
 def assemble_families(api_dump_path: str = ''):
-
+    """ organize available areas as a tree of families """
     dataset = load_dataset(api_dump_path=api_dump_path)
-    libraries = select_by_parent(dataset)
-    return adopt_areas(dataset, libraries)
+    libraries = select_children(dataset)
+    return adopt_children(dataset, libraries)
 
 
-## available areas as a tree of families
 family_tree = assemble_families(api_dump_path=API_DUMP_AREAS)
 
 
@@ -194,20 +201,25 @@ def families_names(families: list[dict], grandparent: dict = {}):
     } or grandparent['TotalCount']  # at the end / leaf of the family tree
 
 
-with open(find_config(AREAS_YML), 'w') as areafile:
-    areafile.write('\n'.join([
-        line.strip() for line in f"""\
-            # available library sub-areas, with available spaces
-            # this file is generated automatically by `seatlib.py`
-            # at: {timestamp(fullform=True)}
-        \n""".splitlines()
-    ]))
-    yaml.safe_dump(
-        families_names(family_tree),
-        stream=areafile,
-        allow_unicode=True,
-        encoding='utf-8'
-    )
+areas_tree = families_names(family_tree)
+
+def dump_areas():
+    with open(find_config(AREAS_YML), 'w') as datafile:
+        datafile.write('\n'.join([
+            line.strip() for line in f"""\
+                # available library sub-areas, with available spaces
+                # this file is generated automatically by `seatlib.py`
+                # at: {timestamp(fullform=True)}
+            \n""".splitlines()
+        ]))
+        yaml.safe_dump(
+            areas_tree,
+            stream=datafile,
+            allow_unicode=True,
+            encoding='utf-8'
+        )
+
+dump_areas()
 
 
 # %% filter hate list TODO
