@@ -135,10 +135,10 @@ eprint()
 # %% load dataset from api
 def load_dataset(
     api_url: str = API_TSINGHUA_AREAS,
-    selectors: list[str] = ['data', 'list', 'seatinfo'],
+    selectors: list[str | int] = ['data', 'list', 'seatinfo'],
     api_dump_path: str = ''
 ):
-    """ load data from API and dump to `api-dump.json`, returning seatinfo """
+    """ load data from API and return a selected subset """
     with urllib.request.urlopen(api_url) as response:
         data = response.read()
     if api_dump_path:
@@ -211,11 +211,32 @@ with open(find_config(AREAS_YML), 'w') as areafile:
 
 
 # %% filter hate list TODO
-def fetch_day_id(area_id: int):
-    pass
+def fetch_day_data(area_id: int):
+    return load_dataset(
+        f"{API_TSINGHUA_DAYS.rstrip('/')}/{area_id}",
+        ['data', 'list', 0]
+    )
 
 def load_seatcodes(area_id: int):
-    pass
+    day_data = fetch_day_data(area_id)
+    time_data = {
+        ## "2023-05-06 08:00:00" -> "08:00:00"
+        key: day_data[key]['date'].split(' ')[-1]
+        for key in ('startTime', 'endTime')
+    }
+    time_data = time_data | {
+        ## actually, use _now_ as the the 'startTime'
+        'startTime': timestamp()
+    }
+    return load_dataset(
+        f"{API_TSINGHUA_SEATCODES.rstrip('/')}?"
+        f"area={day_data['area']}&"
+        f"segment={day_data['id']}&"
+        f"day={day_data['day']}&"
+        f"startTime={time_data['startTime']}&"
+        f"endTime={time_data['endTime']}",
+        ['data', 'list']
+    )
 
 
 # %% find selected areas
