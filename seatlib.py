@@ -136,28 +136,33 @@ eprint()
 def load_dataset(
     api_url: str = API_TSINGHUA_AREAS,
     selectors: list[str] = ['data', 'list', 'seatinfo'],
-    dump_path: str = ''
+    api_dump_path: str = ''
 ):
     """ load data from API and dump to `api-dump.json`, returning seatinfo """
     with urllib.request.urlopen(api_url) as response:
         data = response.read()
-    if dump_path:
-        with open(dump_path, 'wb') as dumpfile:
+    if api_dump_path:
+        with open(api_dump_path, 'wb') as dumpfile:
             dumpfile.write(data)
 
     # nested dict access: https://stackoverflow.com/a/14692747
     return functools.reduce(operator.getitem, selectors, json.loads(data))
 
 
-def select_matching(listdicts: list[dict], key, value):
+def select_matching(listdicts: list[dict], key, value) -> list:
     return [ entry for entry in listdicts if entry[key] == value ]
+
+
+def select_by_parent(dataset: list[dict], parent_id: int = 0) -> list:
+    """ select by `parentId`, which defaults to 0 for top level libraries """
+    return select_matching(dataset, 'parentId', parent_id)
 
 
 def adopt_areas(dataset: list[dict], parents: list[dict]):
     """ adopt child areas from the dataset, for each of the parents """
     families = []
     for this_parent in parents:
-        children = select_matching(dataset, 'parentId', this_parent['id'])
+        children = select_by_parent(dataset, this_parent['id'])
         families.append(
             this_parent | {
                 'children': adopt_areas(dataset, parents=children)
@@ -166,10 +171,15 @@ def adopt_areas(dataset: list[dict], parents: list[dict]):
     return families
 
 
-dataset = load_dataset(dump_path=API_DUMP_AREAS)
-godmother = { 'id': 0 }
-libraries = select_matching(dataset, 'parentId', godmother['id'])
-families_tree = adopt_areas(dataset, libraries)
+def assemble_families(api_dump_path: str = ''):
+
+    dataset = load_dataset(api_dump_path=api_dump_path)
+    libraries = select_by_parent(dataset)
+    return adopt_areas(dataset, libraries)
+
+
+## available areas as a tree of families
+family_tree = assemble_families(api_dump_path=API_DUMP_AREAS)
 
 
 # %% export available areas
@@ -193,7 +203,7 @@ with open(find_config(AREAS_YML), 'w') as areafile:
         \n""".splitlines()
     ]))
     yaml.safe_dump(
-        families_names(families_tree),
+        families_names(family_tree),
         stream=areafile,
         allow_unicode=True,
         encoding='utf-8'
@@ -262,12 +272,9 @@ def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
     })
 
     # reload dataset
-    dataset = load_dataset()
+    family_tree = assemble_families()
 
-    libraries = select_matching(dataset, 'parentId', godmother['id'])
-    families = adopt_areas(dataset, libraries)
-
-    hit = match_areas(prefs_tree, families)
+    hit = match_areas(prefs_tree, family_tree)
     if hit:
         eprint_info(hit, file=sys.stdout)
         return hit
