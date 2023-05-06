@@ -52,7 +52,7 @@ The debug printout would show you the config directory.
 
 As an exercise I try to write pure functions (with no side effects), even though this is expensive in python.
 I have hence relied on the dict merge operator `|` introduced in python 3.9.
-Ideally all variables are immutable in this script.
+Ideally all global variables can be made immutable in this script.
 
 ## api & spelunking
 
