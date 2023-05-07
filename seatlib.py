@@ -248,13 +248,29 @@ def load_datetime(area_id: int) -> str:
     )
 
 
-def load_seatcodes(area_id: int):
+def clean_seatinfo(seat: dict) -> dict:
+    """ clean up entry by removing useless items """
+    return {
+        key: value for key, value in seat.items()
+        if not any([
+            fnmatch.fnmatch(key, pattern)
+            for pattern in (
+                'point_*',
+                'width',
+                'height'
+            )
+        ])
+    }
+
+
+def load_seatlist(area_id: int):
     datetime_spec = load_datetime(area_id)
-    return load_dataset(
+    seatlist = load_dataset(
         f"{API_TSINGHUA_SEATCODES.rstrip('/')}?{datetime_spec}",
         ['data', 'list'],
         API_DUMP_SEATCODES
     )
+    return [ clean_seatinfo(entry) for entry in seatlist ]
 
 
 class SeatStat(enum.IntEnum):
@@ -265,12 +281,6 @@ class SeatStat(enum.IntEnum):
 
 def select_seats(seats: list[dict], status: SeatStat = SeatStat.AVAILABLE):
     return select_matching(seats, 'status', status)
-
-
-# seats: list[dict] = load_seatcodes(95)
-# focused_seats = select_seats(seats, SeatStat.TEMP_LEAVE)
-# focused_codes = [ seat['name'] for seat in focused_seats ]
-# focused_codes
 
 
 def match_seat(hatelist: list[str], seat: dict):
@@ -290,6 +300,11 @@ def exclude_seats(hatelist: list[str], seats: list[dict]):
         if not match_seat(hatelist, site)
     ]
 
+
+# seats: list[dict] = load_seatlist(95)
+# focused_seats = select_seats(seats, SeatStat.TEMP_LEAVE)
+# focused_codes = [ seat['name'] for seat in focused_seats ]
+# focused_codes
 
 # exclude_seats(hatelist, focused_seats)
 
