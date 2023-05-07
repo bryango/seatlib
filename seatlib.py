@@ -302,7 +302,11 @@ def eprint_info(site_info: dict, **kwargs):
            **kwargs)
 
 
-def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
+def match_areas(
+        selectors: dict,
+        areas: list[dict],
+        parent_name: str = ''
+) -> dict:
     """ match areas to area selectors, recursively """
 
     for site in areas:
@@ -338,17 +342,23 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
                 continue  # to the next site
             return site_info
 
+    return {}  # if no match
+
 
 # %% watch the api
-def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
+def watch(
+        prefs_tree,
+        pause: list = SLEEP_INTERVAL,
+        print_header: bool = True
+) -> dict:
 
-    # print header
-    eprint_info({
-        'id': 'id',
-        'name': 'name',
-        'AvailableSpace': '👌',
-        'TotalCount': '👇'
-    })
+    if print_header:
+        eprint_info({
+            'id': 'id',
+            'name': 'name',
+            'AvailableSpace': '👌',
+            'TotalCount': '👇'
+        })
 
     # reload dataset
     family_tree = assemble_families()
@@ -359,11 +369,11 @@ def watch(prefs_tree, pause: list = SLEEP_INTERVAL):
         return hit
 
     time.sleep(random.uniform(*SLEEP_INTERVAL))
-    return watch(prefs_tree, pause=pause)
+    return watch(prefs_tree, pause=pause, print_header=False)
 
 
 def execute() -> None:
-    """ provides the script entry point, with no return """
+    """ provide the script entry point, always return None """
     watch(prefs_tree)
 
 
