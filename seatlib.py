@@ -318,21 +318,25 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
             'id': site['id']
         }
 
-        next_selectors = selectors[matched_keys[0]]
-        if type(next_selectors) is int:  # at the end / leaf of the family tree
+        next_selectors : dict|int = selectors[matched_keys[0]]
 
+        if type(next_selectors) is dict: # recurse into the next level
+            next_areas = site['children']
+            next_match = match_areas(
+                next_selectors,
+                next_areas,
+                site_info['name']
+            )
+            if not next_match:
+                continue  # to the next site
+            return next_match
+
+        if type(next_selectors) is int: # at the end / leaf of the family tree
             minimal_seatnum : int = next_selectors
             eprint_info(site_info)
-            if site_info['AvailableSpace'] > minimal_seatnum:
-                return site_info
-
-            continue  # no return if none available
-
-        next_areas = site['children']
-        next_match = match_areas(next_selectors, next_areas, site_info['name'])
-        if next_match:
-            return next_match
-        continue
+            if site_info['AvailableSpace'] <= minimal_seatnum:
+                continue  # to the next site
+            return site_info
 
 
 # %% watch the api
