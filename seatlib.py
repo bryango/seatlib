@@ -8,7 +8,8 @@ PREFS_YML : str = 'prefs.yml'   # input:  preferred areas
 HATES_YML : str = 'hates.yml'   # input:  hated areas
 CONFIG_DIR_DEFAULT : str = 'config'
 
-API_DUMP_AREAS = './api-dump.json'
+API_DUMP_AREAS = './api-areas.json'
+API_DUMP_SEATCODES = './api-seatcodes.json'
 API_TSINGHUA_AREAS = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areas'
 API_TSINGHUA_DAYS = 'https://seat.lib.tsinghua.edu.cn/api.php/v3areadays'
 API_TSINGHUA_SEATCODES = 'https://seat.lib.tsinghua.edu.cn/api.php/spaces_old'
@@ -22,6 +23,8 @@ import json
 import random
 import functools
 import operator
+import enum
+import fnmatch
 import yaml
 
 ### set working directory
@@ -247,8 +250,47 @@ def load_seatcodes(area_id: int):
         f"day={day_data['day']}&"
         f"startTime={time_data['startTime']}&"
         f"endTime={time_data['endTime']}",
-        ['data', 'list']
+        ['data', 'list'],
+        API_DUMP_SEATCODES
     )
+
+
+class SeatStat(enum.IntEnum):
+    AVAILABLE  = 1
+    IN_USE     = 6
+    TEMP_LEAVE = 7
+
+
+def select_seats(seats: list[dict], status: SeatStat = SeatStat.AVAILABLE):
+    return select_matching(seats, 'status', status)
+
+
+# seats: list[dict] = load_seatcodes(95)
+# focused_seats = select_seats(seats, SeatStat.TEMP_LEAVE)
+# focused_codes = [ seat['name'] for seat in focused_seats ]
+# focused_codes
+
+
+def match_seat(hatelist: list[str], seat: dict):
+    """ match a seat to the rules in the hatelist """
+    matched_hates = [
+        rule for rule in hatelist
+        if fnmatch.fnmatch(seat['name'], rule)
+    ]
+    # eprint(matched_hates)
+    return matched_hates
+
+
+def exclude_seats(hatelist: list[str], seats: list[dict]):
+    """ exclude seats in the hatelist """
+    return [
+        site for site in seats
+        if not match_seat(hatelist, site)
+    ]
+
+
+# exclude_seats(hatelist, focused_seats)
+
 
 
 # %% find selected areas
@@ -266,7 +308,7 @@ def match_areas(selectors: dict, areas: list[dict], parent_name: str = ''):
     for site in areas:
 
         matched_keys = [ key for key in selectors if key in site['name'] ]
-        if not any(matched_keys):
+        if not matched_keys:
             continue
 
         site_info = {
