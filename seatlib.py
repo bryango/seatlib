@@ -226,30 +226,32 @@ dump_areas()
 
 
 # %% filter hate list TODO
-def fetch_day_data(area_id: int):
-    return load_dataset(
+def load_datetime(area_id: int) -> str:
+    day_data = load_dataset(
         f"{API_TSINGHUA_DAYS.rstrip('/')}/{area_id}",
         ['data', 'list', 0]
     )
-
-def load_seatcodes(area_id: int):
-    day_data = fetch_day_data(area_id)
     time_data = {
         ## "2023-05-06 08:00:00" -> "08:00:00"
         key: day_data[key]['date'].split(' ')[-1]
         for key in ('startTime', 'endTime')
-    }
-    time_data = time_data | {
+    } | {
         ## actually, use _now_ as the the 'startTime'
         'startTime': timestamp()
     }
-    return load_dataset(
-        f"{API_TSINGHUA_SEATCODES.rstrip('/')}?"
+    return (
         f"area={day_data['area']}&"
         f"segment={day_data['id']}&"
         f"day={day_data['day']}&"
         f"startTime={time_data['startTime']}&"
-        f"endTime={time_data['endTime']}",
+        f"endTime={time_data['endTime']}"
+    )
+
+
+def load_seatcodes(area_id: int):
+    datetime_spec = load_datetime(area_id)
+    return load_dataset(
+        f"{API_TSINGHUA_SEATCODES.rstrip('/')}?{datetime_spec}",
         ['data', 'list'],
         API_DUMP_SEATCODES
     )
@@ -295,10 +297,15 @@ def exclude_seats(hatelist: list[str], seats: list[dict]):
 
 # %% find selected areas
 def eprint_info(site_info: dict, **kwargs):
+    more_info = [
+        site_info[key] for key in site_info
+        if key not in ['id', 'AvailableSpace', 'TotalCount', 'name']
+    ]
     eprint(timestamp(),
-           f"{site_info['id']}",
+           site_info['id'],
            f"{site_info['AvailableSpace']}/{site_info['TotalCount']}",
-           f"{site_info['name']}",
+           site_info['name'],
+           *more_info,
            **kwargs)
 
 
@@ -365,6 +372,9 @@ def watch(
 
     hit = match_areas(prefs_tree, family_tree)
     if hit:
+        hit = hit | {
+            'datetime': load_datetime(hit['id'])
+        }
         eprint_info(hit, file=sys.stdout)
         return hit
 
