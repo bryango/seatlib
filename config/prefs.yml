@@ -17,9 +17,9 @@
 #     ## ... in which the items are prefixed with a dash (-)
 #     # - 315: ^2  # the book smell is too overwhelming
 #     - 319: ^4
-#     ## a minimal seat number constraint may be specified
+#     ## a minimal number of vacant seats may be specified
 #     ## ... '^x' means that the program will not return
-#     ## ... until there are > x remaining seats
+#     ## ... until there are strictly > x remaining seats
 #     ## ... the default behavior is '^0'
 
 文科图书馆:
@@ -28,6 +28,7 @@
   # ... e.g. 一层 -> 一
   一: C
   # 二: C
+  # 二: [C: ^1]  # bracket necessary, otherwise illegal yaml
   # 三: C
   # 四: C
 
