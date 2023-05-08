@@ -301,13 +301,11 @@ def exclude_seats(hatelist: list[str], seats: list[dict]):
     ]
 
 
+## usage
 # seats: list[dict] = load_seatlist(95)
 # focused_seats = select_seats(seats, SeatStat.TEMP_LEAVE)
-# focused_codes = [ seat['name'] for seat in focused_seats ]
-# focused_codes
-
-# exclude_seats(hatelist, focused_seats)
-
+# good_seats = exclude_seats(hatelist, focused_seats)
+# good_codes = [ seat['name'] for seat in good_seats ]
 
 
 # %% find selected areas
@@ -362,6 +360,19 @@ def match_areas(
             eprint_info(site_info)
             if site_info['AvailableSpace'] <= minimal_seatnum:
                 continue  # to the next site
+
+            # filter seat codes
+            seats: list[dict] = load_seatlist(site_info['id'])
+            available_seats = select_seats(seats, SeatStat.AVAILABLE)
+            good_seats = exclude_seats(hatelist, available_seats)
+            if not good_seats:
+                continue  # to the next site
+
+            # more site info
+            site_info = site_info | {
+                'datetime': load_datetime(site_info['id']),
+                'seats': [ seat['name'] for seat in good_seats ]
+            }
             return site_info
 
     return {}  # if no match
@@ -387,9 +398,6 @@ def watch(
 
     hit = match_areas(prefs_tree, family_tree)
     if hit:
-        hit = hit | {
-            'datetime': load_datetime(hit['id'])
-        }
         eprint_info(hit, file=sys.stdout)
         return hit
 
