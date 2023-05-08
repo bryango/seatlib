@@ -103,28 +103,33 @@ def canonicalize_prefs(tree) -> CanonicalTree | int:
         newtree = {}
         for entry in tree:
             if type(entry) is dict:
+                # the entry is flattened
+                # the values are canonicalized
                 newtree |= {
                     str(key): canonicalize_prefs(value)
                     for key, value in entry.items()
-                    if key not in newtree  # skip specified keys
+                    if key not in newtree  # skip already specified keys
                 }
-            else:
-                canonical_entry = canonicalize_prefs(entry)
 
-                if type(canonical_entry) is CanonicalTree:
-                    newtree |= canonical_entry
-                    continue
+                continue  # to next entry
 
-                # otherwise, escape! cannot be further canonicalized
-                if not newtree:
-                    newtree = canonical_entry
+            # otherwise, the whole entry is canonicalized
+            canonical_entry = canonicalize_prefs(entry)
 
-                eprint()
-                eprint(f'WARNING: config {tree} truncated to {newtree}')
-                eprint(f'... {PREFS_YML} has issues, please fix!')
-                eprint()
+            if type(canonical_entry) is dict:
+                newtree |= canonical_entry
+                continue  # to next entry
 
-                return newtree
+            # otherwise, escape! cannot be further canonicalized
+            if not newtree:
+                newtree = canonical_entry
+
+            eprint()
+            eprint(f'WARNING: config {tree} truncated to {newtree}')
+            eprint(f'... {PREFS_YML} has issues, please fix!')
+            eprint()
+
+            return newtree
 
         return newtree
 
