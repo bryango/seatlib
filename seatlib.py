@@ -45,8 +45,9 @@ def eprint(*args, **kwargs):
     kwargs.setdefault('sep', '\t')
     print(*args, **kwargs)
 
-def timestamp(fullform=False):
-    return time.asctime() if fullform else time.asctime().split()[-2]
+def timestamp(*, fullform=False):
+    return time.asctime() if fullform \
+      else time.asctime().split()[-2]
 
 eprint(
     timestamp(),
@@ -85,7 +86,10 @@ def find_config(yml_config: str) -> str:
 
 
 # %% process preferences
-def canonicalize_prefs(tree):
+
+CanonicalTree = dict[str, 'CanonicalTree | int']
+
+def canonicalize_prefs(tree) -> CanonicalTree | int:
     """ rewrites the `prefs.yml` tree as a nested dict, recursively """
 
     if type(tree) is dict:
@@ -105,7 +109,23 @@ def canonicalize_prefs(tree):
                     if key not in newtree  # skip specified keys
                 }
             else:
-                newtree |= canonicalize_prefs(entry)
+                canonical_entry = canonicalize_prefs(entry)
+
+                if type(canonical_entry) is CanonicalTree:
+                    newtree |= canonical_entry
+                    continue
+
+                # otherwise, escape! cannot be further canonicalized
+                if not newtree:
+                    newtree = canonical_entry
+
+                eprint()
+                eprint(f'WARNING: config {tree} truncated to {newtree}')
+                eprint(f'... {PREFS_YML} has issues, please fix!')
+                eprint()
+
+                return newtree
+
         return newtree
 
     if tree is None:
@@ -116,10 +136,11 @@ def canonicalize_prefs(tree):
         if tree.startswith('^'):
             return int(tree.lstrip('^'))
 
+    # last resort / escape hatch:
     return { str(tree): 0 }
 
 
-def load_prefs():
+def read_prefs() -> CanonicalTree:
     with open(find_config(PREFS_YML), 'r') as datafile:
         prefs_tree = yaml.safe_load(datafile)
 
@@ -127,10 +148,16 @@ def load_prefs():
     prefs_tree = canonicalize_prefs(prefs_tree)
     eprint('canonicalized:', prefs_tree)
 
+    if type(prefs_tree) is not dict:
+        raise TypeError(
+            f'expected a tree from `{PREFS_YML}`, '
+            f'found {type(prefs_tree)}'
+        )
+
     return prefs_tree
 
 
-def load_hatelist() -> list[str]:
+def read_hates() -> list[str]:
     hatelist_path = find_config(HATES_YML)
     with open(hatelist_path, 'r') as datafile:
         hatelist : list[str] = yaml.safe_load(datafile)
@@ -138,13 +165,14 @@ def load_hatelist() -> list[str]:
     return hatelist
 
 
-hatelist = load_hatelist()
-prefs_tree = load_prefs()
+hates_list = read_hates()
+prefs_tree = read_prefs()
 eprint()
 
 
 # %% load dataset from api
 def load_dataset(
+    *,
     api_url: str = API_TSINGHUA_AREAS,
     selectors: list[str | int] = ['data', 'list', 'seatinfo'],
     api_dump_path: str = ''
@@ -160,16 +188,16 @@ def load_dataset(
     return functools.reduce(operator.getitem, selectors, json.loads(data))
 
 
-def select_matching(listdicts: list[dict], key, value) -> list:
+def select_matching(listdicts: list[dict], key, value) -> list[dict]:
     return [ entry for entry in listdicts if entry[key] == value ]
 
 
-def select_children(dataset: list[dict], parent_id: int = 0) -> list:
+def select_children(dataset: list[dict], parent_id: int = 0) -> list[dict]:
     """ select children by `parentId`, which defaults to 0 at top level """
     return select_matching(dataset, 'parentId', parent_id)
 
 
-def adopt_children(dataset: list[dict], parents: list[dict]):
+def adopt_children(dataset: list[dict], parents: list[dict]) -> list[dict]:
     """ adopt children from the dataset, for each of the parents """
     families = []
     for this_parent in parents:
@@ -182,7 +210,7 @@ def adopt_children(dataset: list[dict], parents: list[dict]):
     return families
 
 
-def assemble_families(api_dump_path: str = ''):
+def assemble_families(*, api_dump_path: str = '') -> list[dict]:
     """ organize available areas as a tree of families """
     dataset = load_dataset(api_dump_path=api_dump_path)
     libraries = select_children(dataset)
@@ -193,7 +221,10 @@ family_tree = assemble_families(api_dump_path=API_DUMP_AREAS)
 
 
 # %% export available areas
-def families_names(families: list[dict], grandparent: dict = {}):
+def families_names(
+    families: list[dict],
+    grandparent: dict = {}
+) -> CanonicalTree | int:
     """ generates a nested dict of family names """
     return {
         family['name'].strip(): families_names(
@@ -210,7 +241,7 @@ def dump_areas():
     with open(find_config(AREAS_YML), 'w') as datafile:
         datafile.write('\n'.join([
             line.strip() for line in f"""\
-                # available library sub-areas, with available spaces
+                # available library areas with available seats count
                 # this file is generated automatically by `seatlib.py`
                 # at: {timestamp(fullform=True)}
             \n""".splitlines()
@@ -225,11 +256,12 @@ def dump_areas():
 dump_areas()
 
 
-# %% filter hate list TODO
+# %% filter hate list
 def load_datetime(area_id: int) -> str:
+    """ load datetime from API and format to string spec """
     day_data = load_dataset(
-        f"{API_TSINGHUA_DAYS.rstrip('/')}/{area_id}",
-        ['data', 'list', 0]
+        api_url=f"{API_TSINGHUA_DAYS.rstrip('/')}/{area_id}",
+        selectors=['data', 'list', 0]
     )
     time_data = {
         ## "2023-05-06 08:00:00" -> "08:00:00"
@@ -249,7 +281,7 @@ def load_datetime(area_id: int) -> str:
 
 
 def clean_seatinfo(seat: dict) -> dict:
-    """ clean up entry by removing useless items """
+    """ clean up seat entry by removing useless items """
     return {
         key: value for key, value in seat.items()
         if not any([
@@ -263,12 +295,12 @@ def clean_seatinfo(seat: dict) -> dict:
     }
 
 
-def load_seatlist(area_id: int):
+def load_seatlist(area_id: int) -> list[dict]:
     datetime_spec = load_datetime(area_id)
     seatlist = load_dataset(
-        f"{API_TSINGHUA_SEATCODES.rstrip('/')}?{datetime_spec}",
-        ['data', 'list'],
-        API_DUMP_SEATCODES
+        api_url=f"{API_TSINGHUA_SEATCODES.rstrip('/')}?{datetime_spec}",
+        selectors=['data', 'list'],
+        api_dump_path=API_DUMP_SEATCODES
     )
     return [ clean_seatinfo(entry) for entry in seatlist ]
 
@@ -279,11 +311,14 @@ class SeatStat(enum.IntEnum):
     TEMP_LEAVE = 7
 
 
-def select_seats(seats: list[dict], status: SeatStat = SeatStat.AVAILABLE):
+def select_seats(
+    seats: list[dict],
+    status: SeatStat = SeatStat.AVAILABLE
+) -> list[dict]:
     return select_matching(seats, 'status', status)
 
 
-def match_seat(hatelist: list[str], seat: dict):
+def match_seat(hatelist: list[str], seat: dict) -> list[str]:
     """ match a seat to the rules in the hatelist """
     matched_hates = [
         rule for rule in hatelist
@@ -293,7 +328,7 @@ def match_seat(hatelist: list[str], seat: dict):
     return matched_hates
 
 
-def exclude_seats(hatelist: list[str], seats: list[dict]):
+def exclude_seats(hatelist: list[str], seats: list[dict]) -> list[dict]:
     """ exclude seats in the hatelist """
     return [
         site for site in seats
@@ -302,10 +337,10 @@ def exclude_seats(hatelist: list[str], seats: list[dict]):
 
 
 ## usage
-# seats: list[dict] = load_seatlist(95)
+# seats = load_seatlist(95)
 # focused_seats = select_seats(seats, SeatStat.TEMP_LEAVE)
-# good_seats = exclude_seats(hatelist, focused_seats)
-# good_codes = [ seat['name'] for seat in good_seats ]
+# wanted_seats = exclude_seats(hatelist, focused_seats)
+# wanted_codes = [ seat['name'] for seat in wanted_seats ]
 
 
 # %% find selected areas
@@ -323,7 +358,7 @@ def eprint_info(site_info: dict, **kwargs):
 
 
 def match_areas(
-        selectors: dict,
+        selectors: CanonicalTree,
         areas: list[dict],
         parent_name: str = ''
 ) -> dict:
@@ -364,7 +399,7 @@ def match_areas(
             # filter seat codes
             seats: list[dict] = load_seatlist(site_info['id'])
             available_seats = select_seats(seats, SeatStat.AVAILABLE)
-            good_seats = exclude_seats(hatelist, available_seats)
+            good_seats = exclude_seats(hates_list, available_seats)
             if not good_seats:
                 continue  # to the next site
 
@@ -380,7 +415,7 @@ def match_areas(
 
 # %% watch the api
 def watch(
-        prefs_tree,
+        prefs_tree: CanonicalTree,
         pause: list = SLEEP_INTERVAL,
         print_header: bool = True
 ) -> dict:
