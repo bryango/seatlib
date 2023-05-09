@@ -47,8 +47,8 @@ This output can be further utilized by a messenger, here realized in the helper 
 The config should be correctly generated at the usual user config directory for all platforms.
 The debug printout would show you the config directory. 
 
-- My personal config is provided as [**prefs.yml**](./prefs.yml)
-- To find available library seating areas, see [**areas.yml**](./areas.yml)
+- My personal config is provided as [**prefs.yml**](./config/prefs.yml)
+- To find available library seating areas, see [**areas.yml**](./config/areas.yml)
 
 ## style & `python>=3.9`
 
