@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "seatlib"
-version = "0.2.0"
+version = "0.3.0"
 description = "library seat watcher for Tsinghua"
 authors = ["Bryan Lai <bryanlais@gmail.com>"]
 license = "GPL-3.0-or-later"
@@ -11,6 +11,8 @@ include = ["*.yml"]
 python = "^3.10"
 PyYAML = "^6.0"
 confuse = "^2.0"
+
+[tool.poetry.group.test.dependencies]
 pytest = "^7.3"
 
 [tool.poetry.group.dev.dependencies]

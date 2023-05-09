@@ -123,7 +123,7 @@ pycparser = "*"
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
 files = [
@@ -210,7 +210,7 @@ files = [
 name = "exceptiongroup"
 version = "1.1.1"
 description = "Backport of PEP 654 (exception groups)"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -240,7 +240,7 @@ tests = ["asttokens", "littleutils", "pytest", "rich"]
 name = "iniconfig"
 version = "2.0.0"
 description = "brain-dead simple config-ini parsing"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -250,14 +250,14 @@ files = [
 
 [[package]]
 name = "ipykernel"
-version = "6.22.0"
+version = "6.23.0"
 description = "IPython Kernel for Jupyter"
 category = "dev"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "ipykernel-6.22.0-py3-none-any.whl", hash = "sha256:1ae6047c1277508933078163721bbb479c3e7292778a04b4bacf0874550977d6"},
-    {file = "ipykernel-6.22.0.tar.gz", hash = "sha256:302558b81f1bc22dc259fb2a0c5c7cf2f4c0bdb21b50484348f7bafe7fb71421"},
+    {file = "ipykernel-6.23.0-py3-none-any.whl", hash = "sha256:fc886f1dcdc0ec17f277e4d21fd071c857d381adcb04f3f3735d25325ca323c6"},
+    {file = "ipykernel-6.23.0.tar.gz", hash = "sha256:bd6f487d9e2744c84f6e667d46462d7647a4c862e70e08282f05a52b9d4b705f"},
 ]
 
 [package.dependencies]
@@ -284,14 +284,14 @@ test = ["flaky", "ipyparallel", "pre-commit", "pytest (>=7.0)", "pytest-asyncio"
 
 [[package]]
 name = "ipython"
-version = "8.13.1"
+version = "8.13.2"
 description = "IPython: Productive Interactive Computing"
 category = "dev"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "ipython-8.13.1-py3-none-any.whl", hash = "sha256:1c80d08f04144a1994cda25569eab07fbdc4989bd8d8793e3a4ff643065ccb51"},
-    {file = "ipython-8.13.1.tar.gz", hash = "sha256:9c8487ac18f330c8a683fc50ab6d7bc0fcf9ef1d7a9f6ce7926938261067b81f"},
+    {file = "ipython-8.13.2-py3-none-any.whl", hash = "sha256:ffca270240fbd21b06b2974e14a86494d6d29290184e788275f55e0b55914926"},
+    {file = "ipython-8.13.2.tar.gz", hash = "sha256:7dff3fad32b97f6488e02f87b970f309d082f758d7b7fc252e3b19ee0e432dbb"},
 ]
 
 [package.dependencies]
@@ -416,7 +416,7 @@ files = [
 name = "packaging"
 version = "23.1"
 description = "Core utilities for Python packages"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -487,7 +487,7 @@ test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.3.1)", "pytest-
 name = "pluggy"
 version = "1.0.0"
 description = "plugin and hook calling mechanisms for python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -599,7 +599,7 @@ plugins = ["importlib-metadata"]
 name = "pytest"
 version = "7.3.1"
 description = "pytest: simple powerful testing with Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -833,7 +833,7 @@ tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -893,4 +893,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "135c3fb14c03b6048b56e7c7c0ed2658f38119079b1d81c7426b5592f3097655"
+content-hash = "735a5799219b160c5a09c994deca4fd0deb99345bfa2bd255b1e23e941db3679"

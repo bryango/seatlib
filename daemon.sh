@@ -10,10 +10,11 @@ BROWSER=epiphany
 
 cd "$(dirname "$(readlink -f "$0")")" || exit
 $EDITOR ./config/prefs.yml
+$BROWSER &>/dev/null & disown
 
 if \
   data=$(poetry run ./seatlib.py)
-  # data="15:00:16	95	1/28	文科图书馆 一层 C区"  # example debug input
+  # data="15:00:16	95	1/28	文科图书馆 一层 C区	area=95&segment=1593416&day=2023-5-8&startTime=10:24&endTime=22:00"  # example debug input
 then
 
   echo "$data"
@@ -25,13 +26,15 @@ then
   IFS=$'\t' read -r -a results <<< "$data"
   area_id=${results[1]}
   seatinfo="${results[3]}  [${results[2]}]"
+  datetime_string=${results[4]}
+  target_url="https://seat.lib.tsinghua.edu.cn/web/seat3?area=$area_id&$datetime_string"
 
   notify-send \
-    "发现座位！ID: $area_id"\
-    "$seatinfo" &
+    "发现座位！$seatinfo"\
+    "$target_url" &
     # --hint=int:transient:1 &
 
   $BROWSER "https://seat.lib.tsinghua.edu.cn/cas/index.php?callback=https://seat.lib.tsinghua.edu.cn/home/web/f_second" &>/dev/null & disown
   sleep 0.5
-  $BROWSER "https://seat.lib.tsinghua.edu.cn/web/seat3?area=$area_id" &>/dev/null & disown
+  $BROWSER "$target_url" &>/dev/null & disown
 fi
