@@ -26,7 +26,7 @@ However, for cleanliness, it is recommended to:
 - install [**poetry** with pipx](https://python-poetry.org/docs/#installing-with-pipx) (believe me, it's worth it)
 - sync the dependencies with poetry, in a local venv, then run the script:
 ```bash
-poetry update --without test,dev -vv
+poetry update -vv # --with test,dev  ## for development
 poetry run ./seatlib.py
 ```
 
