@@ -5,7 +5,10 @@ description = "library seat watcher for Tsinghua"
 authors = ["Bryan Lai <bryanlais@gmail.com>"]
 license = "GPL-3.0-or-later"
 readme = "README.md"
-include = ["config"]
+packages = [
+    { include = "seatlib.py" },
+    { include = "config/" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
