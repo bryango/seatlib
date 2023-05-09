@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "seatlib"
-version = "0.3.0"
+version = "0.3.1"
 description = "library seat watcher for Tsinghua"
 authors = ["Bryan Lai <bryanlais@gmail.com>"]
 license = "GPL-3.0-or-later"
@@ -12,9 +12,13 @@ python = "^3.10"
 PyYAML = "^6.0"
 confuse = "^2.0"
 
+[tool.poetry.group.test]
+optional = true
 [tool.poetry.group.test.dependencies]
 pytest = "^7.3"
 
+[tool.poetry.group.dev]
+optional = true
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.22.0"
 
