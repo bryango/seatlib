@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "seatlib"
-version = "0.3.1"
+version = "0.3.2"
 description = "library seat watcher for Tsinghua"
 authors = ["Bryan Lai <bryanlais@gmail.com>"]
 license = "GPL-3.0-or-later"
 readme = "README.md"
-include = ["*.yml"]
+include = ["config"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
