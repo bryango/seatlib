@@ -41,6 +41,12 @@ This output can be further utilized by a messenger, here realized in the helper 
 
 ## config & run
 
+<details><summary><b>possible conflicts</b></summary><br>
+
+The default config is installed as a stub package [`config`](./config/). This will conflict with [the pypi package of the same name](https://pypi.org/project/config/), but I don't want to rename my config folder, so here it is. If you happens to use the pypi `config`, please install seatlib in a venv without it.
+
+</details>
+
 - when run as a package, the default config is located at `~/.config/seatlib` for linux
 - when run as a script, the default config is located at the script directory
 
