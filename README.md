@@ -13,12 +13,12 @@ Library seat watcher for Tsinghua
 - `pipx install git+https://github.com/bryango/seatlib`
 - run `seatlib` and see!
 
-### as a script
+<details><summary><h3>as a script</h3></summary>
 
 The only dependencies are:
 - `python>=3.9` for the dict merge operator `|`
 - `PyYAML` for configurations
-- `confuse` optional for package config management
+- `confuse` (optional) for package config management
 
 If you are already in a environment with all the dependences, simply execute [`./seatlib.py`](./seatlib.py).
 However, for cleanliness, it is recommended to:
@@ -29,6 +29,8 @@ However, for cleanliness, it is recommended to:
 poetry update -vv # --with test,dev  ## for development
 poetry run ./seatlib.py
 ```
+
+</details>
 
 The script [`./seatlib.py`](./seatlib.py):
 - prints its debug output to stderr
