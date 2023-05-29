@@ -5,9 +5,13 @@
 ## ... this is realized by the builtin `fnmatch` module
 ## ... see: https://docs.python.org/3/library/fnmatch.html
 
+## temporary
+- 'F1C013'
+
 ## broken window shades
 # humanities library
 - 'F1C004'
+- 'F1C017'
 
 ## window-less seats
 # west area 315
@@ -15,3 +19,6 @@
 - 'WF3E01[012]'
 # west area 319
 - 'WF3E02[1234]'
+# humanities
+- 'F1C02[5678]'
+- 'F2C07[23456789]'
