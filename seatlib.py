@@ -2,7 +2,7 @@
 # watch for library seats at Tsinghua
 
 # %% setup & paths
-SLEEP_INTERVAL = [10, 20]       # pause between refreshes
+SLEEP_INTERVAL = [5, 10]       # pause between refreshes
 AREAS_YML : str = 'areas.yml'   # output: valid areas
 PREFS_YML : str = 'prefs.yml'   # input:  preferred areas
 HATES_YML : str = 'hates.yml'   # input:  hated areas

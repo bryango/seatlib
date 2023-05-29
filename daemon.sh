@@ -9,8 +9,24 @@ BROWSER=epiphany
 # set -x  # for debug output
 
 cd "$(dirname "$(readlink -f "$0")")" || exit
-$EDITOR ./config/prefs.yml
-$BROWSER &>/dev/null & disown
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -n|--no-prefs)
+      NO_PREFS=YES
+      shift
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+if [[ -z $NO_PREFS ]]; then
+  $EDITOR ./config/prefs.yml
+fi
+
+( nohup $BROWSER &>/dev/null & disown ) &>/dev/null & disown
 
 if \
   data=$(poetry run ./seatlib.py)
