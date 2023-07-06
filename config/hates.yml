@@ -5,8 +5,11 @@
 ## ... this is realized by the builtin `fnmatch` module
 ## ... see: https://docs.python.org/3/library/fnmatch.html
 
-## temporary
-- 'F1C013'
+# ## temporary
+# - 'F1C013'
+
+# ## too hot (for the summer)
+# - 'F1C00[1-8]'
 
 ## broken window shades
 # humanities library

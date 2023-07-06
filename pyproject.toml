@@ -1,14 +1,16 @@
 [tool.poetry]
 name = "seatlib"
-version = "0.3.2"
+version = "0.3.3"
 description = "library seat watcher for Tsinghua"
 authors = ["Bryan Lai <bryanlais@gmail.com>"]
 license = "GPL-3.0-or-later"
 readme = "README.md"
 packages = [
     { include = "seatlib.py" },
-    { include = "config/" }
+    { include = "config/" },
+    { include = "wrapper.py" }
 ]
+include = ["daemon.sh"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -31,6 +33,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 seatlib = 'seatlib:execute'
+seatlib-daemon = 'wrapper:execute'
 
 [tool.ruff]
 select = ["E", "F", "W"]
