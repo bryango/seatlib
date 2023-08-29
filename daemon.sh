@@ -26,7 +26,8 @@ if [[ -z $NO_PREFS ]]; then
   $EDITOR ./config/prefs.yml
 fi
 
-( nohup $BROWSER &>/dev/null & disown ) &>/dev/null & disown
+## https://superuser.com/questions/172043
+( setsid $BROWSER &>/dev/null & )
 
 if \
   data=$(poetry run ./seatlib.py)

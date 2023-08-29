@@ -6,15 +6,17 @@
 ## ... see: https://docs.python.org/3/library/fnmatch.html
 
 # ## temporary
-# - 'F1C013'
+# - 'F1C016'
+- 'F1C009'
 
 # ## too hot (for the summer)
-# - 'F1C00[1-8]'
+- 'F1C00[1-8]'
 
 ## broken window shades
 # humanities library
+- 'F1C001'
 - 'F1C004'
-- 'F1C017'
+- 'F1C01[78]'
 
 ## window-less seats
 # west area 315
