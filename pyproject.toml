@@ -35,6 +35,13 @@ build-backend = "poetry.core.masonry.api"
 seatlib = 'seatlib:execute'
 seatlib-daemon = 'wrapper:execute'
 
+[tool.ruff.lint]
+preview = true
+explicit-preview-rules = true
+extend-select = [
+    "E721" # using `is` to check for exact type equality
+]
+
 [tool.ruff]
 select = ["E", "F", "W"]
 ignore = [
