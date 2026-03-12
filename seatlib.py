@@ -76,6 +76,7 @@ eprint('config dir:', CONFIG_DIR)
 
 def find_config(yml_config: str) -> str:
     """ find and return config path, creating a default if non-existed """
+    os.makedirs(CONFIG_DIR, exist_ok=True)
     config_path = os.path.join(CONFIG_DIR, yml_config)
     if not os.path.exists(config_path):
         import shutil
