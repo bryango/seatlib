@@ -20,7 +20,7 @@ confuse = "^2.0"
 [tool.poetry.group.test]
 optional = true
 [tool.poetry.group.test.dependencies]
-pytest = "^7.3"
+pytest = ">=7.3,<10.0"
 
 [tool.poetry.group.dev]
 optional = true
